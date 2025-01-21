@@ -53,4 +53,5 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposed_version")
     implementation("org.jetbrains.exposed:exposed-jodatime:$exposed_version")
 
+    implementation("org.mindrot:jbcrypt:0.4")
 }

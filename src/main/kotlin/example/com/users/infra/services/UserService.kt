@@ -4,18 +4,20 @@ import example.com.users.domain.dtos.CreateUser
 import example.com.users.domain.dtos.UpdateUser
 import example.com.users.domain.models.User
 import example.com.users.domain.repositories.UserRepository
-import java.util.UUID
+import org.mindrot.jbcrypt.BCrypt
 
 class UserService(private val userRepository: UserRepository) {
      suspend  fun getAll(term: String?, page: Int, perPage: Int) = userRepository.getAll(term, page, perPage)
 
      suspend fun create(formData: CreateUser): User {
 
-        if (userRepository.findByEmail(formData.email) != null) {
+        if (userRepository.findByEmail(formData.email).getSuccessData() != null) {
             throw Exception("User already exists")
         }
 
-         val password = formData.password
+         val salt = BCrypt.gensalt()
+         val password = BCrypt.hashpw(formData.password, salt)
+
         return userRepository.create(
             formData = CreateUser(
                 fullName = formData.fullName,
@@ -26,25 +28,29 @@ class UserService(private val userRepository: UserRepository) {
                 documentNumber = formData.documentNumber,
                 role = formData.role
             )
-        )
+        ).getSuccessData()
     }
 
-    suspend  fun getOne(id: UUID): User? {
-        val user = userRepository.findById(id)
-        if(user == null) {
-            throw Exception("User not found")
-        }
+    suspend  fun getOne(id: String): User? {
+        val user = userRepository.findById(id).getSuccessData() ?: throw Exception("User not found")
         return user
     }
 
-    suspend fun update(id: UUID, formData: UpdateUser): User {
-        userRepository.findById(id) ?: throw Exception("User not found")
-        return userRepository.update(id, formData)
+    suspend fun update(id: String, formData: UpdateUser): User {
+        userRepository.findById(id).getSuccessData() ?: throw Exception("User not found")
+        return userRepository.update(id, formData).getSuccessData()
     }
 
+    suspend fun deleteOne(id: String): User {
+        userRepository.findById(id).getSuccessData() ?: throw Exception("User not found")
+        return userRepository.delete(id).getSuccessData()!!
+    }
 
-    suspend fun deleteOne(id: UUID): User {
-        userRepository.findById(id) ?: throw Exception("User not found")
-        return userRepository.delete(id)!!
+    suspend  fun login(email: String, password: String): User {
+        val user = userRepository.findByEmail(email).getSuccessData() ?: throw Exception("User not found")
+//        if (!BCrypt.checkpw(password, user.password)) {
+//            throw Exception("Invalid password")
+//        }
+        return user
     }
 }

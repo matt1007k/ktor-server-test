@@ -9,9 +9,9 @@ import java.util.UUID
 
 interface UserRepository {
     suspend fun getAll(term: String?, page: Int, perPage: Int): Result<PaginatedResult<User>>
-    suspend fun create(formData: CreateUser): User
-    suspend fun findById(id: UUID): User?
-    suspend fun findByEmail(email: String): User?
-    suspend fun update(id: UUID, formData: UpdateUser): User
-    suspend fun delete(id: UUID): User?
+    suspend fun create(formData: CreateUser): Result<User>
+    suspend fun findById(id: String): Result<User?>
+    suspend fun findByEmail(email: String): Result<User?>
+    suspend fun update(id: String, formData: UpdateUser): Result<User>
+    suspend fun delete(id: String): Result<User?>
 }

@@ -58,7 +58,7 @@ fun Application.usersRouting() {
             get("/{id}") {
                 val id = call.parameters["id"] ?: throw IllegalArgumentException("Invalid ID")
                 try {
-                    val user = userService.getOne(id as UUID)
+                    val user = userService.getOne(id)
                     call.respond(HttpStatusCode.OK, user!!)
                 } catch (e: Exception) {
                     call.respond(HttpStatusCode.NotFound)
@@ -70,7 +70,7 @@ fun Application.usersRouting() {
                     ?: throw IllegalArgumentException("Invalid ID")
                 val userBody = call.receive<UpdateUser>()
                 try {
-                    val user = userService.update(id as UUID, userBody)
+                    val user = userService.update(id, userBody)
                     call.respond(HttpStatusCode.OK, user)
                 } catch (e: Exception) {
                     call.respond(HttpStatusCode.BadRequest, message = e.message.toString())
@@ -81,7 +81,7 @@ fun Application.usersRouting() {
                 val id = call.parameters["id"]?.toString()
                     ?: throw IllegalArgumentException("Invalid ID")
                 try {
-                    val user = userService.deleteOne(id as UUID)
+                    val user = userService.deleteOne(id)
                     call.respond(HttpStatusCode.NoContent, user)
                 } catch (e: Exception) {
                     call.respond(HttpStatusCode.BadRequest, message = e.message.toString())

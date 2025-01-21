@@ -16,15 +16,22 @@ import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.andWhere
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.insertAndGetId
 import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.update
+import org.joda.time.LocalDateTime
 import java.util.UUID
+import kotlin.uuid.Uuid
 
 class UserRepositoryImpl : UserRepository {
     @Throws(Exception::class)
-    override suspend fun getAll(term: String?, page: Int, perPage: Int): Result<PaginatedResult<User>> =
+    override suspend fun getAll(
+        term: String?,
+        page: Int,
+        perPage: Int
+    ): Result<PaginatedResult<User>> =
         suspendTransaction {
             try {
                 addLogger(StdOutSqlLogger)
@@ -49,10 +56,16 @@ class UserRepositoryImpl : UserRepository {
                 println("total: $total")
                 println("users: $data")
 
-                Result.Success(PaginatedResult(
-                    data = data,
-                    metadata = Metadata(total = total.toInt(), lastPage = lastPage, perPage = perPage)
-                ))
+                Result.Success(
+                    PaginatedResult(
+                        data = data,
+                        metadata = Metadata(
+                            total = total.toInt(),
+                            lastPage = lastPage,
+                            perPage = perPage
+                        )
+                    )
+                )
             } catch (e: Exception) {
                 print("ERROR getAll UserRepositoryImpl: ${e.message.toString()}")
                 Result.Error("Error getAll UserRepositoryImpl")
@@ -60,44 +73,82 @@ class UserRepositoryImpl : UserRepository {
 
         }
 
-    override suspend fun create(formData: CreateUser): User = suspendTransaction {
-        val userId = UsersTable.insert {
-            it[fullName] = formData.fullName
-            it[email] = formData.email
-            it[password] = formData.password
-            it[avatarUrl] = formData.avatarUrl
-            it[documentType] = formData.documentType
-            it[documentNumber] = formData.documentNumber
-            it[role] = formData.role
-        } get UsersTable.id
+    override suspend fun create(formData: CreateUser): Result<User> = suspendTransaction {
+        println("create formData UserRepositoryImpl: $formData")
+        try {
+            val userId = UsersTable.insertAndGetId {
+                it[fullName] = formData.fullName
+                it[email] = formData.email
+                it[password] = formData.password
+                it[avatarUrl] = formData.avatarUrl
+                it[documentType] = formData.documentType
+                it[documentNumber] = formData.documentNumber
+                it[role] = formData.role
+            }.value
 
-        UsersTable.selectAll().andWhere { UsersTable.id eq userId }.first().let { toUserModel(it) }
-    }
-
-    override suspend fun findById(id: UUID): User? = suspendTransaction {
-        UsersTable.select { UsersTable.id eq id }.map { toUserModel(it) }.singleOrNull()
-    }
-
-    override suspend fun findByEmail(email: String): User? = suspendTransaction {
-        UsersTable.select { UsersTable.email eq email }.map { toUserModel(it) }.singleOrNull()
-    }
-
-    override suspend fun update(id: UUID, formData: UpdateUser): User = suspendTransaction {
-        UsersTable.update({ UsersTable.id eq id }) {
-            formData.fullName?.let { it1 -> it[fullName] = it1 }
-            formData.email?.let { it1 -> it[email] = it1 }
-            formData.password?.let { it1 -> it[password] = it1 }
-            formData.avatarUrl?.let { it1 -> it[avatarUrl] = it1 }
-            formData.documentType?.let { it1 -> it[documentType] = it1 }
-            formData.documentNumber?.let { it1 -> it[documentNumber] = it1 }
-            formData.role?.let { it1 -> it[role] = it1 }
-            formData.status?.let { it1 -> it[status] = it1 }
+            Result.Success(
+                UsersTable.selectAll().andWhere { UsersTable.id eq userId }.first()
+                    .let { toUserModel(it) })
+        } catch (e: Exception) {
+            print("ERROR create UserRepositoryImpl: ${e.message.toString()}")
+            Result.Error("Error create UserRepositoryImpl")
         }
-        UsersTable.select { UsersTable.id eq id }.map { toUserModel(it) }.first()
     }
 
-    override suspend fun delete(id: UUID): User? = suspendTransaction {
-        UsersTable.deleteWhere { UsersTable.id eq id }
-        UsersTable.select { UsersTable.id eq id }.map { toUserModel(it) }.first()
+    override suspend fun findById(id: String): Result<User?> = suspendTransaction {
+        try {
+            val uuId = UUID.fromString(id)
+            val user = UsersTable.select { UsersTable.id eq uuId }.map { toUserModel(it) }
+                .singleOrNull()
+            println("findById UserRepositoryImpl: $user")
+
+            Result.Success(user)
+        } catch (e: Exception) {
+            print("ERROR findById UserRepositoryImpl: ${e.message.toString()}")
+            Result.Error("Error findById UserRepositoryImpl")
+        }
+    }
+
+    override suspend fun findByEmail(email: String): Result<User?> = suspendTransaction {
+        try {
+            Result.Success(UsersTable.select { UsersTable.email eq email }.map { toUserModel(it) }.singleOrNull())
+        } catch (e: Exception) {
+            print("ERROR findByEmail UserRepositoryImpl: ${e.message.toString()}")
+            Result.Error("Error findByEmail UserRepositoryImpl")
+        }
+    }
+
+    override suspend fun update(id: String, formData: UpdateUser): Result<User> = suspendTransaction {
+        try {
+            val uuId = UUID.fromString(id)
+            UsersTable.update({ UsersTable.id eq uuId }) {
+                formData.fullName?.let { it1 -> it[fullName] = it1 }
+                formData.email?.let { it1 -> it[email] = it1 }
+                formData.password?.let { it1 -> it[password] = it1 }
+                formData.avatarUrl?.let { it1 -> it[avatarUrl] = it1 }
+                formData.documentType?.let { it1 -> it[documentType] = it1 }
+                formData.documentNumber?.let { it1 -> it[documentNumber] = it1 }
+                formData.role?.let { it1 -> it[role] = it1 }
+                formData.status?.let { it1 -> it[status] = it1 }
+            }
+
+            Result.Success(UsersTable.select { UsersTable.id eq uuId }.map { toUserModel(it) }.first())
+        } catch (e: Exception) {
+            print("ERROR update UserRepositoryImpl: ${e.message.toString()}")
+            Result.Error("Error update UserRepositoryImpl")
+        }
+
+    }
+
+    override suspend fun delete(id: String): Result<User?> = suspendTransaction {
+        val uuId = UUID.fromString(id)
+        try {
+            UsersTable.deleteWhere { UsersTable.id eq uuId }
+            Result.Success(UsersTable.select { UsersTable.id eq uuId }.map { toUserModel(it) }.first())
+        } catch (e: Exception) {
+            print("ERROR delete UserRepositoryImpl: ${e.message.toString()}")
+            Result.Error("Error delete UserRepositoryImpl")
+        }
+
     }
 }
