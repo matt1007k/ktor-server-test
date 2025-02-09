@@ -8,7 +8,9 @@ import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
 
 fun Application.configureDatabases() {
-    createOrUpdateEnum("OrderStatus", listOf("INITIAL", "PAID"))
+    createOrUpdateEnum("DocumentType", listOf("RUC", "DNI"))
+    createOrUpdateEnum("Role", listOf("ADMIN", "CUSTOMER", "SELLER"))
+    createOrUpdateEnum("Status", listOf("ACTIVE", "INACTIVE"))
     transaction {
         SchemaUtils.create(UsersTable)
     }
