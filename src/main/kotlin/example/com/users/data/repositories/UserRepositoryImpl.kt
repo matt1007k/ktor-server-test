@@ -4,8 +4,8 @@ import example.com.core.data.models.suspendTransaction
 import example.com.core.domain.Metadata
 import example.com.core.domain.PaginatedResult
 import example.com.core.domain.Result
-import example.com.users.data.domain.UsersTable
-import example.com.users.data.domain.toUserModel
+import example.com.users.data.domain.models.UsersTable
+import example.com.users.data.domain.models.toUserModel
 import example.com.users.domain.dtos.CreateUser
 import example.com.users.domain.dtos.UpdateUser
 import example.com.users.domain.models.User
@@ -21,9 +21,7 @@ import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.update
-import org.joda.time.LocalDateTime
 import java.util.UUID
-import kotlin.uuid.Uuid
 
 class UserRepositoryImpl : UserRepository {
     @Throws(Exception::class)
@@ -74,9 +72,8 @@ class UserRepositoryImpl : UserRepository {
         }
 
     override suspend fun create(formData: CreateUser): Result<User> = suspendTransaction {
-        println("create formData UserRepositoryImpl: $formData")
         try {
-            val userId = UsersTable.insertAndGetId {
+            val user = UsersTable.insert {
                 it[fullName] = formData.fullName
                 it[email] = formData.email
                 it[password] = formData.password
@@ -84,11 +81,11 @@ class UserRepositoryImpl : UserRepository {
                 it[documentType] = formData.documentType
                 it[documentNumber] = formData.documentNumber
                 it[role] = formData.role
-            }.value
+            }.resultedValues!!
+                .first()
+                .let { toUserModel(it) }
 
-            Result.Success(
-                UsersTable.selectAll().andWhere { UsersTable.id eq userId }.first()
-                    .let { toUserModel(it) })
+            Result.Success(user)
         } catch (e: Exception) {
             print("ERROR create UserRepositoryImpl: ${e.message.toString()}")
             Result.Error("Error create UserRepositoryImpl")

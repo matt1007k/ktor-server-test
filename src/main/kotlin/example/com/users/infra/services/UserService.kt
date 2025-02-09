@@ -1,12 +1,16 @@
 package example.com.users.infra.services
 
+import example.com.users.data.domain.models.UsersTable
 import example.com.users.domain.dtos.CreateUser
 import example.com.users.domain.dtos.UpdateUser
 import example.com.users.domain.models.User
 import example.com.users.domain.repositories.UserRepository
+import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.transactions.transaction
 import org.mindrot.jbcrypt.BCrypt
 
 class UserService(private val userRepository: UserRepository) {
+
      suspend  fun getAll(term: String?, page: Int, perPage: Int) = userRepository.getAll(term, page, perPage)
 
      suspend fun create(formData: CreateUser): User {

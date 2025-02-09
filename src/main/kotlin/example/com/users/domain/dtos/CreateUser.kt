@@ -8,18 +8,18 @@ data class CreateUser(
     val email: String,
     val password: String,
     val avatarUrl: String,
-    val role: Role = Role.SELLER,
-    val documentType: DocumentType = DocumentType.DNI,
+    val role: Role,
+    val documentType: DocumentType,
     val documentNumber: String
 )
 
-enum class Role(val value: String) {
-    SELLER("SELLER"),
-    ADMIN("ADMIN"),
-    COSTUMER("COSTUMER"),
+enum class Role {
+    SELLER,
+    ADMIN,
+    CUSTOMER
 }
 
-enum class DocumentType(val value: String) {
-    DNI("DNI"),
-    RUC("RUC")
+enum class DocumentType {
+    DNI,
+    RUC
 }

@@ -1,5 +1,6 @@
 package example.com.users.infra.route
 
+import example.com.users.data.domain.models.UsersTable
 import example.com.users.data.repositories.UserRepositoryImpl
 import example.com.users.domain.dtos.CreateUser
 import example.com.users.domain.dtos.UpdateUser
@@ -16,18 +17,14 @@ import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import org.jetbrains.exposed.sql.Database
-import java.util.UUID
+import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.transactions.transaction
 
 fun Application.usersRouting() {
-    val driver = environment.config.property("postgres.driver").getString()
-    val url = environment.config.property("postgres.url").getString()
-    val user = environment.config.property("postgres.user").getString()
-    val password = environment.config.property("postgres.password").getString()
-    Database.connect(url, driver = driver, user = user, password = password)
-    val userRepository = UserRepositoryImpl()
-    val userService = UserService(userRepository)
 
-    configureRequestValidation()
+    val userService = UserService(UserRepositoryImpl())
+
+//    configureRequestValidation()
     routing {
         route("/users") {
 

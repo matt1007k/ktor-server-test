@@ -21,7 +21,7 @@ data class User(
     val updatedAt: String,
 )
 
-enum class Status(val value: String) {
-    ACTIVE("ACTIVE"),
-    INACTIVE("INACTIVE")
+enum class Status {
+    ACTIVE,
+    INACTIVE
 }
