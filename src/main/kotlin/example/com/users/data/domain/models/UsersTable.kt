@@ -6,11 +6,14 @@ import example.com.users.domain.dtos.DocumentType
 import example.com.users.domain.dtos.Role
 import example.com.users.domain.models.Status
 import example.com.users.domain.models.User
+import org.jetbrains.exposed.dao.UUIDEntity
+import org.jetbrains.exposed.dao.UUIDEntityClass
 import org.jetbrains.exposed.dao.id.UUIDTable
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.jodatime.datetime
 import org.joda.time.DateTime
 import org.postgresql.util.PGobject
+import java.util.UUID
 
 object UsersTable : UUIDTable("users") {
     val fullName = varchar("fullName", 100)
@@ -71,3 +74,28 @@ inline fun <reified T : Enum<T>> enumColumnCustom(
         toDb = { PGEnum(escapeEnum(enumTypeDb), it) },
         sql = escapeEnum(enumTypeDb)
     ).default(defaultValue)
+
+//
+//class User(id: org.jetbrains.exposed.dao.id.EntityID<UUID>) : UUIDEntity(id) {
+//    companion object : UUIDEntityClass<User>(table = UsersTable)
+//    var fullName by UsersTable.fullName
+////    val roles by Role via UserRoles
+//    // Other properties
+//}
+//
+//object Roles : UUIDTable("roles") {
+//    val name = varchar("name", 255).uniqueIndex()
+//}
+//
+//class Role(id: org.jetbrains.exposed.dao.id.EntityID<UUID>) : UUIDEntity(id) {
+//    companion object : UUIDEntityClass<Role>(Roles)
+//    var name by Roles.name
+////    val users by User via UserRoles
+//    // Other properties
+//}
+//
+//object UserRoles : org.jetbrains.exposed.sql.Table("user_roles") {
+//    val user = reference("user_id", UsersTable)
+//    val role = reference("role_id", Roles)
+//    override val primaryKey = PrimaryKey(user, role) // Composite primary key
+//}

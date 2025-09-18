@@ -29,13 +29,26 @@ dependencies {
     implementation("io.ktor:ktor-server-core-jvm")
     implementation("io.ktor:ktor-serialization-kotlinx-json-jvm")
     implementation("io.ktor:ktor-server-content-negotiation-jvm")
+    implementation("io.ktor:ktor-server-content-negotiation")
     implementation("org.postgresql:postgresql:$postgres_version")
     implementation("com.h2database:h2:$h2_version")
+    // Html builder
     implementation("io.ktor:ktor-server-openapi")
     implementation("io.ktor:ktor-server-cors-jvm")
     implementation("io.ktor:ktor-server-netty-jvm")
+    implementation("io.ktor:ktor-server-html-builder")
+    implementation("io.swagger.codegen.v3:swagger-codegen-generators:1.0.57")
+    // Docs scalar yml to json
+    implementation("io.ktor:ktor-serialization-jackson")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.18.1")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.18.1")
+
+    // Validation body request
     implementation("io.ktor:ktor-server-request-validation")
+    // Status page error
     implementation("io.ktor:ktor-server-status-pages")
+    // Resource type-safe routing
+    implementation("io.ktor:ktor-server-resources")
 
     implementation("ch.qos.logback:logback-classic:$logback_version")
     implementation("io.ktor:ktor-server-config-yaml")

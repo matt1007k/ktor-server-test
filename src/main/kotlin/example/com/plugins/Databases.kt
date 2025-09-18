@@ -7,15 +7,6 @@ import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
 
-fun Application.configureDatabases() {
-    createOrUpdateEnum("DocumentType", listOf("RUC", "DNI"))
-    createOrUpdateEnum("Role", listOf("ADMIN", "CUSTOMER", "SELLER"))
-    createOrUpdateEnum("Status", listOf("ACTIVE", "INACTIVE"))
-    transaction {
-        SchemaUtils.create(UsersTable)
-    }
-}
-
 fun Application.connectToPostgres() {
     Database.connect(
         url = environment.config.property("postgres.url").getString(),
@@ -24,3 +15,21 @@ fun Application.connectToPostgres() {
         password = environment.config.property("postgres.password").getString()
     )
 }
+
+fun Application.configureDatabases() {
+    createOrUpdateEnum("DocumentType", listOf("RUC", "DNI"))
+    createOrUpdateEnum("Role", listOf("ADMIN", "CUSTOMER", "SELLER"))
+    createOrUpdateEnum("Status", listOf("ACTIVE", "INACTIVE"))
+    transaction {
+        SchemaUtils.create(UsersTable)
+    }
+
+    transaction {
+        SchemaUtils.createMissingTablesAndColumns(UsersTable)
+        // Checks existing schema against table objects
+        // CREATEs and ALTERs tables and columns if needed
+        // Optionally logs any inconsistencies, with suggested statements to fix
+    // https://www.youtube.com/watch?v=YOXWnM_8vz8
+    }
+}
+

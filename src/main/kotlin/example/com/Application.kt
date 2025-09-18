@@ -5,6 +5,7 @@ import example.com.plugins.configureHTTP
 import example.com.plugins.configureRouting
 import example.com.plugins.configureSerialization
 import example.com.plugins.connectToPostgres
+import example.com.products.infra.route.productRouting
 import example.com.users.data.domain.models.UsersTable
 import example.com.users.domain.dtos.CreateUser
 import example.com.users.infra.route.usersRouting
@@ -74,4 +75,5 @@ fun Application.module() {
     configureHTTP()
     configureRouting()
     usersRouting()
+    productRouting()
 }

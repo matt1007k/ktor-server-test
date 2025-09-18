@@ -19,5 +19,56 @@ paths:
               examples:
                 Example#1:
                   value: "Hello World!"
+  /users:
+    get:
+      description: "Return all users with pagination"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  data:
+                    type: "array"
+                    items:
+                      $ref: "#/components/schemas/User"
+                  metadata:
+                    type: "object"
+                    properties:
+                      total:
+                        type: "integer"
+                      lastPage:
+                        type: "integer"
+                      perPage:
+                        type: "integer"
 components:
-  schemas: {}
+  schemas:
+    User:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: uuid
+        email:
+          type: "string"
+        role:
+          type: "enum"
+          enum:
+            - ADMIN
+            - CUSTOMER
+            - SELLER
+        status:
+          type: enum
+          enum:
+            - ACTIVE
+            - INACTIVE
+        fullName:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
